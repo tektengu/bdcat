@@ -1,0 +1,72 @@
+LICENSE
+
+pynetcat is Copyright (c) 2000 by Sean Reifschneider, tummy.com, ltd.
+All rights reserved.
+
+jafo-pynetcat@tummy.com
+ftp:///ftp.tummy.com/pub/tummy/pynetcat/
+
+pynetcat is Open Source Software (www.opensource.org). 
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+0. Copyright Inclusion: All redistributions of source code must retain the
+above copyright notice, this list of conditions and the following disclaimer.
+
+1. Free Redistribution: pynetcat may be redistributed by anyone for a 
+fee or for free as a component of an aggregate software distribution 
+containing programs from several different sources.
+
+2. Source Code: pynetcat includes source code, and must be distributed
+with source code. If it is distributed without source code, tummy.com, ltd.'s
+ftp site must be mentioned prominently as the location of the source code.
+
+3. Derived Works: Works derived from pynetcat, or modifications to 
+pynetcat must be distributed under the same terms as this original license. 
+4. Integrity of The Author's Source Code: Any works derived from pynetcat,
+or modifications to pynetcat must be distributed as source and "patch"
+files. This is to ensure that changes made to pynetcat are clearly
+specified as such, and the authorship of such changes is clearly identified.
+Patched versions of pynetcat must use a name which identifies them
+as such.
+
+5. No Discrimination Against Persons or Groups: This license applies to
+everyone equally, and does not discriminate in any way.
+
+6. No Discriminiation Against Fields of Endeavor: This license applies to 
+all uses in any field of endeavour equally.
+
+7. Distribution of License: This license, and all rights associated with it
+is assigned upon redistribution of pynetcat without the need for
+execution of an additonal licence by those parties.
+
+8. License not Specific to a Product: The rights attached to pynetcat
+do not depend upon it being part of any specific distribution or product,
+and specifically prohibit the restriction of this license based on being
+part of any entity.
+
+9. Advertising Requirement: All advertising materials mentioning features
+or use of this software must display the following acknowledgement:
+      
+      This product includes software developed by tummy.com, ltd. and its
+      contributors.
+
+10. Neither the name of tummy.com, ltd., nor Sean Reifschneider, nor the
+names of its contributors may be used to endorse or promote products derived
+from this software without prior written permission from tummy.com, ltd.
+or Sean Reifschneider.
+
+DISCLAIMER
+
+THIS SOFTWARE IS PROVIDED BY tummy.com, ltd., Sean Reifschneider 
+AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+tummy.com, ltd., Sean Reifschneider OR CONTRIBUTORS BE LIABLE FOR ANY 
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 

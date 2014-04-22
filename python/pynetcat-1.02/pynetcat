@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+#
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2000, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+#  The license is explained in the file "LICENSE".
+#
+#  pynetcat -- TCP/IP client/server which allows extending a pipe across
+#  machines.  For example:
+#
+#    (on machine b) pynetcat in '' 1234 | gzip -9 > machinea-backup.tar.gz
+#    (on machine a) tar c / | pynetcat out backuphost 1234
+#
+#  In the above example, '' specifies that the server should listen on all
+#  addresses on the local machine.
+
+from socket import *
+import sys
+import time
+
+def bytesToStr(bytes):
+	try:
+		if (bytes > 1024000):
+			return("%.3fM" % ( bytes / 1024000.0 ));
+		if (bytes > 1024):
+			return("%.3fK" % ( bytes / 1024.0 ));
+		return("%dB" % ( bytes ));
+	except OverflowError:
+		return('[Invalid: "%s"]' % str(bytes))
+
+if len(sys.argv) != 4 or (sys.argv[1] != 'in' and sys.argv[1] != 'out'):
+	sys.stderr.write('usage: pyncat (in|out) <host> <port>\n')
+	sys.stderr.write('\t"in" mode copies from network to stdout\n')
+	sys.stderr.write('\t"out" mode copies stdin to network\n')
+	sys.stderr.write('\t"<host>" on "in" should probably be the '
+			'empty string\n')
+	sys.stderr.write('\t(which specifies "bind all local addresses").\n')
+	sys.exit(0)
+
+doIn = sys.argv[1] == 'in'
+
+addr = ( sys.argv[2], int(sys.argv[3]) )
+s = socket(AF_INET, SOCK_STREAM)
+
+if doIn:
+	s.bind(addr)
+	s.listen(1)
+	conn, addr = s.accept()
+	sys.stderr.write('Connected by %s\n' % str(addr))
+	src, dest = conn.recv, sys.stdout.write
+else:
+	s.connect(addr)
+	src, dest = sys.stdin.read, s.send
+
+bytes = 0L
+last = 0
+while 1:
+	data = src(4096)
+	if not data: break
+	dest(data)
+	bytes = bytes + len(data)
+	now = int(time.time())
+	if now != last: sys.stderr.write(' %s       \r' % bytesToStr(bytes))
+	last = now
+sys.stderr.write('%s  \n' % bytesToStr(bytes))

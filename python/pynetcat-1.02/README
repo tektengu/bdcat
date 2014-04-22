@@ -1,0 +1,26 @@
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2000, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  The license is explained in the file "LICENSE".
+#
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+
+This is a collection of programs for sending data across a network to
+another host.  It can be used as part of a pipeline, effectively extending
+the pipe to another host.  Great for backups or recoveries, especially
+on stripped-down floppy systems that have python but not other tools
+(like SSH).
+
+For example:
+
+    (on machine b) pynetcat in '' 1234 | gzip -9 > machinea-backup.tar.gz
+    (on machine a) tar c / | pynetcat out backuphost 1234
+
+In the above example, '' specifies that the server should listen on all
+addresses on the local machine.
+
+There is also a pass-through which works like a simple, unencrypted SSH,
+but without encryption.  Run it as:
+
+   (on machine b) ./pyncrshd -v 1234 ''
+   (on machine a) rsync -e 'python pyncrsh 1234' . 10.9.8.7:/tmp/foo

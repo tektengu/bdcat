@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+#
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2000, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+#  The license is explained in the file "LICENSE".
+#
+#  Minimal pynetcat server, meant for when you have to type it in by hand.
+#  Copies from network to stdout.
+
+from socket import *
+import sys
+
+s = socket(AF_INET, SOCK_STREAM)
+s.bind(( '', int(sys.argv[1]) ))
+s.listen(1)
+
+conn, addr = s.accept()
+while 1:
+	data = conn.recv(4096)
+	if not data: break
+	sys.stdout.write(data)

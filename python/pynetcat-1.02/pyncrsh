@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+#
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2006, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+#  The license is explained in the file "LICENSE".
+#
+#  pyncrsh -- TCP/IP client that does a simple rsh client, connecting to a
+#  simple server.  For example:
+#
+#    (on machine b) ./pyncrshd -v 1234 ''
+#    (on machine a) rsync -e 'python pyncrsh 1234' . 10.9.8.7:/tmp/foo
+#
+#  In the above, the "1234" specifies the port on 10.9.8.7 where the server
+#  is running.
+
+from socket import *
+import sys, time, pickle, select, os
+
+######################
+def bytesToStr(bytes):
+	try:
+		if (bytes > 1024000):
+			return("%.3fM" % ( bytes / 1024000.0 ));
+		if (bytes > 1024):
+			return("%.3fK" % ( bytes / 1024.0 ));
+		return("%dB" % ( bytes ));
+	except OverflowError:
+		return('[Invalid: "%s"]' % str(bytes))
+
+
+#  parse arguments
+verbose = 0
+serverPort = int(sys.argv[1])
+serverHost = sys.argv[2]
+if serverHost == '-v':
+	verbose = 1
+	sys.argv = sys.argv[:2] + sys.argv[3:]
+	serverHost = sys.argv[2]
+if serverHost == '-l':
+	sys.argv = sys.argv[:2] + sys.argv[4:]
+	serverHost = sys.argv[2]
+command = sys.argv[3:]
+
+addr = ( serverHost, serverPort )
+s = socket(AF_INET, SOCK_STREAM)
+s.connect(addr)
+
+#  send command
+cmdStr = pickle.dumps(command)
+if len(cmdStr) > 10240:
+	raise ValueError, 'Command is too long to send'
+cmdStr = (cmdStr + (' ' * 10240))[:10240]
+s.send(cmdStr)
+
+inBytes = 0L
+outBytes = 0L
+last = 0
+socketFd = s.fileno()
+stdinFd = sys.stdin.fileno()
+stdoutFd = sys.stdout.fileno()
+osRead = os.read
+osWrite = os.write
+socketSend = s.send
+socketRecv = s.recv
+try:
+	while 1:
+		rfdl, wfdl, efdl = select.select([socketFd, stdinFd], [], [], None)
+		if stdinFd in rfdl:
+			data = osRead(stdinFd, 4096)
+			if not data:
+				sys.stderr.write('pyncrsh: Stdin closed\n')
+				raise EOFError
+			socketSend(data)
+			outBytes = outBytes + len(data)
+		if socketFd in rfdl:
+			data = socketRecv(4096)
+			if not data:
+				sys.stderr.write('pyncrsh: Remote socket closed\n')
+				raise EOFError
+			osWrite(stdoutFd, data)
+			inBytes = inBytes + len(data)
+		if verbose:
+			now = int(time.time())
+			if now != last:
+				sys.stderr.write('  in=%s/out=%s       \r'
+						% ( bytesToStr(inBytes), bytesToStr(outBytes) ))
+			last = now
+except EOFError:
+	pass
+
+if verbose:
+	sys.stderr.write('  in=%s/out=%s       \n'
+			% ( bytesToStr(inBytes), bytesToStr(outBytes) ))

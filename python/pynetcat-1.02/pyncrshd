@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+#
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2006, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+#  The license is explained in the file "LICENSE".
+#
+#  pyncrshd -- TCP/IP server for the pyncrsh.
+
+from socket import *
+import sys, time, pickle, select, os
+
+######################
+def bytesToStr(bytes):
+	try:
+		if (bytes > 1024000):
+			return("%.3fM" % ( bytes / 1024000.0 ));
+		if (bytes > 1024):
+			return("%.3fK" % ( bytes / 1024.0 ));
+		return("%dB" % ( bytes ));
+	except OverflowError:
+		return('[Invalid: "%s"]' % str(bytes))
+
+
+#  parse arguments
+verbose = 0
+if sys.argv[1] == '-v':
+	verbose = 1
+	sys.argv = sys.argv[:1] + sys.argv[2:]
+serverPort = int(sys.argv[1])
+serverHost = sys.argv[2]
+
+addr = ( serverHost, serverPort )
+s = socket(AF_INET, SOCK_STREAM)
+s.bind(( '', serverPort ))
+s.listen(1)
+conn, addr = s.accept()
+if verbose:
+	sys.stderr.write('Connection from: "%s"\n' % repr(addr))
+
+#  receive command
+cmdStr = conn.recv(10240)
+command = pickle.loads(cmdStr)
+print repr(command)
+
+#  start child
+childRead, childStdout = os.pipe()
+childStdin, childWrite = os.pipe()
+oldStdin = os.dup(0)
+oldStdout = os.dup(1)
+os.dup2(childStdin, 0)
+os.dup2(childStdout, 1)
+childPid = os.spawnvp(os.P_NOWAIT, command[0], command)
+os.dup2(oldStdin, 0)
+os.dup2(oldStdout, 1)
+
+inBytes = 0L
+outBytes = 0L
+last = 0
+socketFd = conn.fileno()
+osRead = os.read
+osWrite = os.write
+socketSend = conn.send
+socketRecv = conn.recv
+try:
+	while 1:
+		rfdl, wfdl, efdl = select.select([socketFd, childRead], [], [], 1)
+
+		#  check for child exit
+		if not rfdl:
+			pid, exitCode = os.waitpid(childPid, os.WNOHANG)
+			if pid != 0:
+				sys.stderr.write('Child exited: %s\n' % exitCode)
+				raise EOFError
+
+		if childRead in rfdl:
+			data = osRead(childRead, 4096)
+			if not data:
+				sys.stderr.write('pyncrsh: Child closed\n')
+				raise EOFError
+			socketSend(data)
+			outBytes = outBytes + len(data)
+		if socketFd in rfdl:
+			data = socketRecv(4096)
+			if not data:
+				sys.stderr.write('pyncrsh: Remote socket closed\n')
+				raise EOFError
+			osWrite(childWrite, data)
+			inBytes = inBytes + len(data)
+		now = int(time.time())
+		if now != last:
+			sys.stderr.write('  in=%s/out=%s       \r'
+					% ( bytesToStr(inBytes), bytesToStr(outBytes) ))
+		last = now
+except EOFError:
+	pass
+
+sys.stderr.write('  in=%s/out=%s       \n'
+		% ( bytesToStr(inBytes), bytesToStr(outBytes) ))

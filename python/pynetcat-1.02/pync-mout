@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+#
+#  Sean Reifschneider <jafo-pynetcat@tummy.com>
+#  Copyright (c) 2000, Sean Reifschneider, tummy.com, ltd.
+#  All Rights Reserved
+#  The license is explained in the file "LICENSE".
+#  ftp://ftp.tummy.com/pub/tummy/pynetcat
+#
+#  Minimal pynetcat client, meant for when you have to type it in by hand.
+#  Copies stdin to remote TCP port.
+
+from socket import *
+import sys
+
+s = socket(AF_INET, SOCK_STREAM)
+s.connect(( sys.argv[1], int(sys.argv[2]) ))
+while 1:
+	data = sys.stdin.read(4096)
+	if not data: break
+	s.send(data)
